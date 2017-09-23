@@ -56,7 +56,8 @@ class MsprojImpController < ApplicationController
 		respond_to do |format|
 			format.html {
 				if session[:finished]
-					import_predecesor
+					Rails.logger.info("html import_predecesor.................")
+					import_predecesor(@mapUID2IssueID)
 					@project.issues.reload
 					redirect_to msproj_imp_import_results_path(:project_id => @project)
 				else
@@ -65,6 +66,11 @@ class MsprojImpController < ApplicationController
 				end
 			}
 			Rails.logger.info("js run.................")
+			if session[:finished]
+				Rails.logger.info("js import_predecesor.................")
+				import_predecesor(@mapUID2IssueID)
+				@project.issues.reload
+			end
 			format.js
 		end
 	end
@@ -308,6 +314,7 @@ class MsprojImpController < ApplicationController
     @required_custom_fields = @@cache.read(:required_custom_fields)
 	@predecessor_link = @@cache.read(:predecessor_link)
 	@usermapping = @@cache.read(:usermapping)
+	@mapUID2IssueID = @@cache.read(:mapUID2IssueID)
   end
   
   def write_cache
@@ -367,12 +374,12 @@ class MsprojImpController < ApplicationController
 		end
 		
 		if @@cache.read(:mapUID2IssueID).nil?
-			mapUID2IssueID = [] # maps UIDs to redmine issue_id
+			@mapUID2IssueID = [] # maps UIDs to redmine issue_id
 		else
-			mapUID2IssueID = @@cache.read(:mapUID2IssueID)
+			@mapUID2IssueID = @@cache.read(:mapUID2IssueID)
 		end
 
-		import_task_result = import_task(task, root_id, last_issue_id, parent_stack, last_outline_level, mapUID2IssueID)
+		import_task_result = import_task(task, root_id, last_issue_id, parent_stack, last_outline_level, @mapUID2IssueID)
 		
 		if import_task_result[:issue_created]
 			update_cache(import_task_result)
@@ -501,7 +508,7 @@ class MsprojImpController < ApplicationController
 		end
 	end
   
-	def import_predecesor
+	def import_predecesor(mapUID2IssueID)
 		#Verify
 		@predecessor_link.each do |link|	    
 			relation = IssueRelation.new
