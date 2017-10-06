@@ -14,27 +14,18 @@ class MsprojImpController < ApplicationController
   
   def upload
 	flash.clear
-	@parent_issue = get_issue_project_parent
-	if @parent_issue.nil?
-		@parent_issue_text = l(:label_not_not_found)
-	else
-		@parent_issue_text = "#" + @parent_issue.id.to_s + " - " + @parent_issue.subject
-	end
+	set_parent_issue_text
   end 
   
   def init_run
 	@parent_issue = get_issue_project_parent
 	if @@cache.read(:parent_issue).nil?
-		@@cache.write(:parent_issue, @parent_issue)
+		@@cache.write(:parent_issue, @parent_issue.id)
 	end
 	
 	if params[:erase_issues]
 		if delete_issues < 0
-			if @parent_issue.nil?
-				@parent_issue_text = l(:label_not_not_found)
-			else
-				@parent_issue_text = "#" + @parent_issue.id.to_s + " - " + @parent_issue.subject
-			end
+			set_parent_issue_text
 			render :action => 'upload'
 			return
 		else
@@ -220,12 +211,7 @@ class MsprojImpController < ApplicationController
 		if !project_parent_issue
 			flash[:error] = error
 			flash[:warning] = warning unless warning.blank?
-			@parent_issue = get_issue_project_parent
-			if @parent_issue.nil?
-				@parent_issue_text = l(:label_not_not_found)
-			else
-				@parent_issue_text = "#" + @parent_issue.id.to_s + " - " + @parent_issue.subject
-			end
+			set_parent_issue_text
 			render :action => 'upload'
 		else
 			extra_info = ""
@@ -235,11 +221,7 @@ class MsprojImpController < ApplicationController
 		end
 	else
 		flash[:error] = l(:file_required)
-		if @parent_issue.nil?
-			@parent_issue_text = l(:label_not_not_found)
-		else
-			@parent_issue_text = "#" + @parent_issue.id.to_s + " - " + @parent_issue.subject
-		end
+		set_parent_issue_text
 		render :action => 'upload'
 	end
   end
@@ -328,7 +310,7 @@ class MsprojImpController < ApplicationController
   
   def update_cache(data)
 	if @@cache.read(:parent_issue).nil?
-		@@cache.write(:parent_issue, data[:issue_created])
+		@@cache.write(:parent_issue, data[:issue_created].id)
 	end
 	
 	@@cache.write(:last_issue_id, data[:last_issue_id])
@@ -351,8 +333,7 @@ class MsprojImpController < ApplicationController
 		if @@cache.read(:parent_issue).nil?
 			root_id = 0
 		else
-			Rails.logger.info("Setting root id to: " + @@cache.read(:parent_issue).id.to_s)
-			root_id = @@cache.read(:parent_issue).id
+			root_id = @@cache.read(:parent_issue)
 		end
 		
 		if @@cache.read(:last_issue_id).nil?
@@ -553,5 +534,14 @@ class MsprojImpController < ApplicationController
   
 	def max_items_per_request
 		5
+	end
+	
+	def set_parent_issue_text
+		@parent_issue = get_issue_project_parent
+		if @parent_issue.nil?
+			@parent_issue_text = l(:label_not_not_found)
+		else
+			@parent_issue_text = "#" + @parent_issue.id.to_s + " - " + @parent_issue.subject
+		end
 	end
 end
