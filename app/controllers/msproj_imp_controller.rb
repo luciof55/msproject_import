@@ -378,7 +378,31 @@ class MsprojImpController < ApplicationController
 		logger.info("Start - last_outline_level: " + last_outline_level.to_s)
 		logger.info("Start - parent_stack " + parent_stack.to_s)
 		issue = Issue.new(:author => User.current, :project  => @project)
-		issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+		if last_issue_id == 0
+			#First issue to be created (parent issue) use parent default tracker, if present
+			if Setting.plugin_msproject_import['parent_tracker_default']
+				issue.tracker_id = Setting.plugin_msproject_import['parent_tracker_default']  # 1-Bug, 2-Feature...
+			else
+				issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+			end
+		else
+			#Subsequent issues
+			if task.summary == '0'
+				#If is not a summary use task tracker, if present
+				if Setting.plugin_msproject_import['task_tracker_default']
+					issue.tracker_id = Setting.plugin_msproject_import['task_tracker_default']  # 1-Bug, 2-Feature...
+				else
+					issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+				end										
+			else
+				#If is a summary use story tracker, if present
+				if Setting.plugin_msproject_import['story_tracker_default']
+					issue.tracker_id = Setting.plugin_msproject_import['story_tracker_default']  # 1-Bug, 2-Feature...
+				else
+					issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+				end	
+			end
+		end
 		if task.task_uid > 0
 			issue.subject = task.name
 			assign=@assignments.select{|as| as.task_uid == task.task_uid}.first

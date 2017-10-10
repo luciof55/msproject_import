@@ -11,6 +11,27 @@
       <td><%= l(:settings_tracker_help)%></td>
     </tr>
 	<tr>
+      <th><%= l(:settings_parent_tracker_caption)%></th>
+      <td>
+      	<%= select_tag 'settings[parent_tracker_default]', options_for_select(Tracker.all.collect {|t| [ t.name, t.id ] }, settings['parent_tracker_default'])%>
+      </td>
+      <td></td>
+    </tr>
+	<tr>
+      <th><%= l(:settings_story_tracker_caption)%></th>
+      <td>
+      	<%= select_tag 'settings[story_tracker_default]', options_for_select(Tracker.all.collect {|t| [ t.name, t.id ] }, settings['story_tracker_default'])%>
+      </td>
+      <td></td>
+    </tr>
+	<tr>
+      <th><%= l(:settings_task_tracker_caption)%></th>
+      <td>
+      	<%= select_tag 'settings[task_tracker_default]', options_for_select(Tracker.all.collect {|t| [ t.name, t.id ] }, settings['task_tracker_default'])%>
+      </td>
+      <td></td>
+    </tr>
+	<tr>
       <th><%= l(:label_use_work)%></th>
       <td>
       	<%= check_box_tag 'settings[use_work]', '1', MsprojectImport.use_work %>

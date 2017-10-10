@@ -30,3 +30,6 @@ es:
   label_parent_issue: "Issue Padre"
   label_not_not_found: "No encontrado"
   label_issues_will_be_erased: "Todos los issues serán eliminados"
+  settings_parent_tracker_caption: "Tracker para los issues padres"
+  settings_story_tracker_caption: "Tracker para las tareas de resumenes"
+  settings_task_tracker_caption: "Tracker para las tareas que no son de resumenes"
