@@ -19,7 +19,7 @@ class MsprojImpController < ApplicationController
   
   def init_run
 	@parent_issue = get_issue_project_parent
-	if @@cache.read(:parent_issue).nil?
+	if @parent_issue && @@cache.read(:parent_issue).nil?
 		@@cache.write(:parent_issue, @parent_issue.id)
 	end
 	
