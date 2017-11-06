@@ -37,54 +37,59 @@ module MsprojImpHelper
 
   def xml_tasks tasks
       task = MsprojTask.new
-      task.task_uid = tasks.elements['UID'].text.to_i if tasks.elements['UID']
-	  task.task_id = tasks.elements['ID'].text.to_i if tasks.elements['ID']
-      task.wbs = tasks.elements['WBS'].text if tasks.elements['WBS']
-      task.outline_level = tasks.elements['OutlineLevel'].text.to_i if tasks.elements['OutlineLevel']
-      
-      name = tasks.elements['Name']
-      task.name = name.text if name
-      
-      start_date = tasks.elements['Start']
-      task.start_date = start_date.text.split('T')[0] if start_date
-      
-      finish_date = tasks.elements['Finish']
-      task.finish_date = finish_date.text.split('T')[0] if finish_date
-      
-      create_date = tasks.elements['CreateDate']
-      date_time = create_date.text.split('T') if create_date
-      task.create_date = date_time[0] + ' ' + date_time[1] if date_time
-      
-      duration_arr = tasks.elements["Work"].text.split("H") if tasks.elements['Work']
+	  duration_arr = tasks.elements["Work"].text.split("H") if tasks.elements['Work']
       duration_hour = duration_arr[0][2..duration_arr[0].size-1] if duration_arr
       duration_min = duration_arr[1][0..duration_arr[1].index("M")-1] if duration_arr && duration_arr[1] && duration_arr[1].index("M")
       task.work = (duration_hour.to_f + duration_min.to_f/60).to_s if duration_arr
+	  task.summary = tasks.elements["Summary"].text if tasks.elements["Summary"]
+	  
+	  if (task.work.nil? || task.work.to_i == 0) && (task.summary.nil? || task.summary == '0')
+		return nil
+	  end
+	  
+	  task.task_uid = tasks.elements['UID'].text.to_i if tasks.elements['UID']
+	  task.task_id = tasks.elements['ID'].text.to_i if tasks.elements['ID']
+	  task.wbs = tasks.elements['WBS'].text if tasks.elements['WBS']
+	  task.outline_level = tasks.elements['OutlineLevel'].text.to_i if tasks.elements['OutlineLevel']
+	  
+	  name = tasks.elements['Name']
+	  task.name = name.text if name
+	  
+	  start_date = tasks.elements['Start']
+	  task.start_date = start_date.text.split('T')[0] if start_date
+	  
+	  finish_date = tasks.elements['Finish']
+	  task.finish_date = finish_date.text.split('T')[0] if finish_date
+	  
+	  create_date = tasks.elements['CreateDate']
+	  date_time = create_date.text.split('T') if create_date
+	  task.create_date = date_time[0] + ' ' + date_time[1] if date_time
 	  
 	  duration_arr = tasks.elements["Duration"].text.split("H") if tasks.elements['Duration']
-      duration_hour = duration_arr[0][2..duration_arr[0].size-1] if duration_arr
-      duration_min = duration_arr[1][0..duration_arr[1].index("M")-1] if duration_arr && duration_arr[1] && duration_arr[1].index("M")
-      task.duration = (duration_hour.to_f + duration_min.to_f/60).to_s if duration_arr   
+	  duration_hour = duration_arr[0][2..duration_arr[0].size-1] if duration_arr
+	  duration_min = duration_arr[1][0..duration_arr[1].index("M")-1] if duration_arr && duration_arr[1] && duration_arr[1].index("M")
+	  task.duration = (duration_hour.to_f + duration_min.to_f/60).to_s if duration_arr   
 	  
-      task.done_ratio = tasks.elements["PercentWorkComplete"].text if tasks.elements['PercentWorkComplete']          
-      
-      if tasks.elements['Priority']
-        priority = tasks.elements["Priority"].text 
-        if priority == "500"
-                task.priority_id = 2  #normal
-        elsif priority < "500"
-                task.priority_id = 1  #niedrig
-        elsif priority < "750"
-                task.priority_id = 3  #hoch
-        elsif priority < "1000"
-                task.priority_id = 4  #dringend
-        else
-                task.priority_id = 5  #sofort
-        end   
-      else
-        task.priority_id = 2  #normal
-      end
-      task.notes=tasks.elements["Notes"].text if tasks.elements["Notes"]
-	  task.summary = tasks.elements["Summary"].text if tasks.elements["Summary"]
+	  task.done_ratio = tasks.elements["PercentWorkComplete"].text if tasks.elements['PercentWorkComplete']          
+	  
+	  if tasks.elements['Priority']
+		priority = tasks.elements["Priority"].text 
+		if priority == "500"
+				task.priority_id = 2  #normal
+		elsif priority < "500"
+				task.priority_id = 1  #niedrig
+		elsif priority < "750"
+				task.priority_id = 3  #hoch
+		elsif priority < "1000"
+				task.priority_id = 4  #dringend
+		else
+				task.priority_id = 5  #sofort
+		end   
+	  else
+		task.priority_id = 2  #normal
+	  end
+	  task.notes=tasks.elements["Notes"].text if tasks.elements["Notes"]
+	  
 	  
 	logger.info("Task uID: #{task.task_uid}")
 	tasks.each_element('PredecessorLink') do |link|
@@ -92,7 +97,7 @@ module MsprojImpHelper
 	 link_to=predecessor.init(link)
 	 logger.info("Link Predecessor: #{link_to.predecessor_uid}")
 	end
-	  
-    return task
+	return task
+    
   end rescue raise 'parse error'
 end

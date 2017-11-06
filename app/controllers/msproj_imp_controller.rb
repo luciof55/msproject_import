@@ -172,9 +172,12 @@ class MsprojImpController < ApplicationController
 						link_to.issue_from_id=task_uid
 						@predecessor_link.push link_to
 					end
-					@tasks.push(xml_tasks child)
-					if child.elements['OutlineLevel'].text == '0'
-						project_parent_issue = true
+					task = xml_tasks(child)
+					if task
+						@tasks.push(task)
+						if child.elements['OutlineLevel'].text == '0'
+							project_parent_issue = true
+						end
 					end
 				else
 					if child.elements['OutlineLevel'].text == '0'
