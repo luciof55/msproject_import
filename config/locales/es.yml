@@ -33,3 +33,5 @@ es:
   settings_parent_tracker_caption: "Tracker para los issues padres"
   settings_story_tracker_caption: "Tracker para las tareas de resumenes"
   settings_task_tracker_caption: "Tracker para las tareas que no son de resumenes"
+  setting_out_line_level: "Out line level"
+  setting_out_line_level_help: "Valor utilizado para identificar la tarea raiz"

@@ -34,3 +34,6 @@ en:
   settings_parent_tracker_caption: "Tracker for parente issues"
   settings_story_tracker_caption: "Tracker for summary task"
   settings_task_tracker_caption: "Tracker for non summary task"
+  setting_out_line_level: "Out line level"
+  setting_out_line_level_help: "Value used to identify root taks"
+  

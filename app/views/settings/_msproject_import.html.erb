@@ -45,5 +45,12 @@
       </td>
       <td><%= l(:label_import_summary_help)%></td>
     </tr>
+	<tr>
+      <th><%= l(:setting_out_line_level) %></th>
+      <td>
+	    <%= text_field_tag 'settings[out_line_level]', MsprojectImport.out_line_level, :size => 2 %>
+      </td>
+	  <td><%= l(:setting_out_line_level_help)%></td>
+    </tr>
   </tbody>
 </table>

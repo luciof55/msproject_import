@@ -98,6 +98,12 @@ class MsprojImpController < ApplicationController
 		content = MsprojDataFile.content
 		doc     = REXML::Document.new(content) 
 		@prefix="MS Project Import(#{Date.today}): "
+		
+		if MsprojectImport.out_line_level
+			out_line_level = MsprojectImport.out_line_level
+		else
+			out_line_level = '0'
+		end
 
 		flash.clear
 		
@@ -175,12 +181,14 @@ class MsprojImpController < ApplicationController
 					task = xml_tasks(child)
 					if task
 						@tasks.push(task)
-						if child.elements['OutlineLevel'].text == '0'
+						if child.elements['OutlineLevel'].text == out_line_level
 							project_parent_issue = true
 						end
+					else
+						@task_skipped += child.elements['ID'].text + " "
 					end
 				else
-					if child.elements['OutlineLevel'].text == '0'
+					if child.elements['OutlineLevel'].text == out_line_level
 						if child.elements['IsNull'].text == "0"
 							task = xml_tasks(child)
 							if task
@@ -188,19 +196,9 @@ class MsprojImpController < ApplicationController
 								@tasks.push(task)
 								project_parent_issue = true
 							else
-								if error != ''
-									error = error + "<br>" + "No project parent task was found."
-								else
-									error = "No project parent task was found."
-								end
 								@task_skipped += child.elements['ID'].text + " "
 							end
 						else
-							if error != ''
-								error = error + "<br>" + "No project parent task was found."
-							else
-								error = "No project parent task was found."
-							end
 							@task_skipped += child.elements['ID'].text + " "
 						end
 					else
@@ -212,6 +210,7 @@ class MsprojImpController < ApplicationController
 		end
 		session[:current] = nil
 		if !project_parent_issue
+			error = "No project parent task was found. Please verify OutlineLevel option"
 			flash[:error] = error
 			flash[:warning] = warning unless warning.blank?
 			set_parent_issue_text
@@ -383,26 +382,26 @@ class MsprojImpController < ApplicationController
 		issue = Issue.new(:author => User.current, :project  => @project)
 		if last_issue_id == 0
 			#First issue to be created (parent issue) use parent default tracker, if present
-			if Setting.plugin_msproject_import['parent_tracker_default']
-				issue.tracker_id = Setting.plugin_msproject_import['parent_tracker_default']  # 1-Bug, 2-Feature...
+			if MsprojectImport.parent_tracker_default
+				issue.tracker_id = MsprojectImport.parent_tracker_default  # 1-Bug, 2-Feature...
 			else
-				issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+				issue.tracker_id = MsprojectImport.tracker_default # 1-Bug, 2-Feature...
 			end
 		else
 			#Subsequent issues
 			if task.summary == '0'
 				#If is not a summary use task tracker, if present
-				if Setting.plugin_msproject_import['task_tracker_default']
-					issue.tracker_id = Setting.plugin_msproject_import['task_tracker_default']  # 1-Bug, 2-Feature...
+				if MsprojectImport.task_tracker_default
+					issue.tracker_id = MsprojectImport.task_tracker_default  # 1-Bug, 2-Feature...
 				else
-					issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+					issue.tracker_id = MsprojectImport.tracker_default  # 1-Bug, 2-Feature...
 				end										
 			else
 				#If is a summary use story tracker, if present
-				if Setting.plugin_msproject_import['story_tracker_default']
-					issue.tracker_id = Setting.plugin_msproject_import['story_tracker_default']  # 1-Bug, 2-Feature...
+				if MsprojectImport.story_tracker_default
+					issue.tracker_id = MsprojectImport.story_tracker_default  # 1-Bug, 2-Feature...
 				else
-					issue.tracker_id = Setting.plugin_msproject_import['tracker_default']  # 1-Bug, 2-Feature...
+					issue.tracker_id = MsprojectImport.tracker_default  # 1-Bug, 2-Feature...
 				end	
 			end
 		end
