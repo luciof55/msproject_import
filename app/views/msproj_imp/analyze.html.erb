@@ -34,12 +34,14 @@
 							css_tr = ''
 						end
 					%>
-						<tr class="assigned_to <%=css_tr%>">
-							<td><%= task[0].name unless task.nil? %></td>
-							<td><%= assigned_to[1] %></td>
-							<td><%= assigned_to[2].name unless assigned_to[3]>2 %></td>
-							<td><%= I18n.t('user_imp_status_' + assigned_to[3].to_s)%></td>
-						</tr>	
+						<% if task[0].present? %>
+							<tr class="assigned_to <%=css_tr%>">
+								<td><%= task[0].name unless task.nil? %></td>
+								<td><%= assigned_to[1] %></td>
+								<td><%= assigned_to[2].name unless assigned_to[3]>2 %></td>
+								<td><%= I18n.t('user_imp_status_' + assigned_to[3].to_s)%></td>
+							</tr>
+						<% end %>
 					<% end %>
 				</table>	
 			<p>
