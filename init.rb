@@ -1,5 +1,5 @@
-ActionDispatch::Callbacks.to_prepare do
-  require 'msproject_import'
+ActiveSupport::Reloader.to_prepare do
+	require 'msproject_import'
 end
 
 Redmine::Plugin.register :msproject_import do
